@@ -1,0 +1,194 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01//EN" "http://www.w3.org/TR/html4/strict.dtd">
+<html>
+<head>
+   <meta http-equiv="Content-Type" content="text/html;charset=UTF-8" />
+   <title>Instagram</title>
+   <style type="text/css">
+    div.tag_search {cursor: pointer}
+    .tag_search{
+    background: -moz-linear-gradient(center top , #76B7EF, #1C87E3 4%, #135F9F) repeat scroll 0 0 transparent;
+    border-radius: 4px 4px 4px 4px;
+    box-shadow: 0 2px 5px #111111;
+    display: inline-block;
+    margin-right: 5px;
+    margin-top: 5px;
+    padding: 5px;color: #fff;}
+   </style>
+   <script src="http://www.google.com/jsapi?key=ABQIAAAA1XbMiDxx_BTCY2_FkPh06RRaGTYH6UMl8mADNa0YKuWNNa8VNxQEerTAUcfkyrr6OwBovxn7TDAH5Q"></script>
+   <script type="text/javascript">google.load("mootools", "1.3");</script>
+   <script type="text/javascript" src="Request.JSONP.js"></script>
+   <script type="text/javascript" src="base.js"></script>
+   <script type="text/javascript" src="media.js"></script>
+   <script type="text/javascript" src="location.js"></script>
+   <script type="text/javascript" src="users.js"></script>
+   <script type="text/javascript" src="tags.js"></script>
+   <script type="text/javascript">
+
+           var myInstagram = new Instagram({
+               client_id: '14f61130851148619ad677aa8a8188bd',
+               redirect_uri: 'http://thinkphp.ro/apps/js-hacks/instagram.js/instagram.html',
+
+               onPopularMedia: function(o){
+
+                     if(window.console) {console.log(o);}
+
+                     $('popularMedia').getChildren().destroy();
+
+                     var imageCount = 0;
+                     Object.each(o.data, function(item){
+                            if(imageCount == 12) {
+                               return;  
+                            }
+                            new Element('img', {src: item.images.thumbnail.url}).inject($('popularMedia'));
+                            imageCount++;
+                     });
+               },
+
+               onSearchMedia: function(o){
+
+                     if(window.console) {console.log(o);}
+
+                     $('searchMedia').getChildren().destroy();
+
+                     var imageCount = 0;
+                     Object.each(o.data, function(item){
+                            if(imageCount == 12) {
+                               return;  
+                            }
+                            new Element('img', {src: item.images.thumbnail.url}).inject($('searchMedia'));
+                            imageCount++;
+                     });
+               },
+
+               onMediaData: function(o){
+
+                     if(window.console) {console.log(o);}
+
+               },
+
+               onSearchUser: function(o) {
+                      
+                     console.log(o); 
+               },
+
+               onUserMedia: function(o) {
+                     
+                     console.log(o); 
+
+                     $('userMedia').getChildren().destroy();
+
+                     var imageCount = 0;
+                     Object.each(o.data, function(item){
+                            if(imageCount == 12) {
+                               return;  
+                            }
+                            new Element('img', {src: item.images.thumbnail.url}).inject($('userMedia'));
+                            imageCount++;
+                     });
+                     
+               },
+
+               onError: function() {
+
+                    alert('Please authorize this, first!!!!');
+               }
+
+           });  
+
+           window.addEvent('domready', function(){
+
+                 //media
+                 myInstagram.getMedia(1234);
+                 myInstagram.getPopularMedia();
+                 myInstagram.searchMedia(40.755833, -73.986389);
+
+                 //tags
+                 myInstagram.searchTag('dojo');
+
+
+                 $('usermedia').addEvent('click',function(){ 
+    
+                    myInstagram.getUserMedia(5596018);
+
+                 });
+
+                 $('authrize').addEvent('click',function(){ 
+                     alert('Authorize');
+                     window.location = myInstagram.getAuthURL();
+                 });
+
+                 myInstagram.checkAuthentication();
+           });
+
+           //Tag Events 
+           myInstagram.addEvent('tagSearch', function(data){
+
+                              $('searchTag').getChildren().destroy();
+
+					Object.each(data.data, function(item){
+						 new Element('div', {
+							'class': 'tag_search',
+							text: item.name,
+							'events': {
+								'click': function(){
+									myInstagram.getTagMedia(this.innerHTML);
+								}
+							}
+						 }).inject($('searchTag'));
+
+                              });
+           });
+
+           myInstagram.addEvent('tagMedia', function(data){
+
+                              $('mediaTag').getChildren().destroy();
+					var imgCount = 1;
+					Object.each(data.data, function(item){
+						if(imgCount > 10)
+							return;
+						
+						var element = new Element('img', {
+							src: item.images.thumbnail.url
+						});
+						element.inject($('mediaTag'));
+						imgCount++;
+					});
+           });
+
+
+//id cbeloch = 987355
+//id david = 5596018
+   </script>
+</head>
+<body>
+
+<button id="authrize">auth</button> |  <button id="usermedia">Get the most recent media published by a user</button>
+
+<h2>UserMedia</h2>
+<div id="userMedia"></div>
+
+
+<h2>PopularMedia</h2>
+<div id="popularMedia"><span>Loading...</span></div>
+<h2>SearchMedia</h2>
+<div id="searchMedia"><span>Loading...</span></div>
+<h2>getMedia</h2>
+<div id="getMedia"><span>Loading...</span></div>
+
+<h2>Get Information about a tag object</h2>
+<div id="infoTag"></div>
+
+<h2>Get a list of recently tagged media</h2>
+<div id="mediaTag"></div>
+
+<h2>Search for tags by name</h2>
+<label for="searchtag">Search: </label><input type="text" placeholder="Enter a tag" id="searchtag"/>
+<div id="searchTag"><span>Loading...</span></div>
+
+<script type="text/javascript">
+           $('searchtag').addEvent('keyup', function(){
+                     myInstagram.searchTag(this.get('value'));
+           });
+</script>
+</body>
+</html>
